@@ -29,6 +29,7 @@ namespace avb {
 // Abstract interface for secure storage.
 class SecureStorageInterface {
  public:
+  SecureStorageInterface() = default;
   virtual ~SecureStorageInterface() = default;
 
   // SecureStorageInterface is neither copyable nor moveable
