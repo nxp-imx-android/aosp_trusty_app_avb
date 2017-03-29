@@ -46,7 +46,8 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
                           const uint8_t* in_buf,
                           uint32_t in_size,
                           UniquePtr<uint8_t[]>* out_buf,
-                          uint32_t* out_size) {
+                          uint32_t* out_size,
+                          AvbError* error) {
   Request req;
   int rc = req.Deserialize(in_buf, in_buf + in_size);
   if (rc < 0) {
@@ -56,6 +57,7 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
   Response rsp;
   (g_avb_manager->*operation)(req, &rsp);
 
+  *error = rsp.get_error();
   *out_size = rsp.GetSerializedSize();
   if (*out_size > kAvbServiceBufSize) {
     TLOGE("Response size too large: %d\n", *out_size);
@@ -79,23 +81,32 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
 
 // Dispatches command |cmd|. Fulfills request in |in_buf|, and writes response
 // to |out_buf|. Returns a Trusty error code if there is a problem serializing
-// the response or deserializing the request. Avb specific errors are sent in
-// the response.
+// the response or deserializing the request. Avb specific errors are put in
+// |error|.
 static int ProcessRequest(uint32_t cmd,
                           const uint8_t* in_buf,
                           uint32_t in_size,
                           UniquePtr<uint8_t[]>* out_buf,
-                          uint32_t* out_size) {
+                          uint32_t* out_size,
+                          AvbError* error) {
   switch (cmd) {
     case READ_ROLLBACK_INDEX:
-      return ExecuteCommand(
-          &AvbManager::ReadRollbackIndex, in_buf, in_size, out_buf, out_size);
+      return ExecuteCommand(&AvbManager::ReadRollbackIndex,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
     case WRITE_ROLLBACK_INDEX:
-      return ExecuteCommand(
-          &AvbManager::WriteRollbackIndex, in_buf, in_size, out_buf, out_size);
+      return ExecuteCommand(&AvbManager::WriteRollbackIndex,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
     case AVB_GET_VERSION:
       return ExecuteCommand(
-          &AvbManager::GetVersion, in_buf, in_size, out_buf, out_size);
+          &AvbManager::GetVersion, in_buf, in_size, out_buf, out_size, error);
     default:
       return ERR_NOT_VALID;
   }
@@ -136,23 +147,21 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
       reinterpret_cast<struct avb_message*>(msg_buf.get());
   UniquePtr<uint8_t[]> out_buf;
   uint32_t out_size = 0;
+  AvbError error;
   rc = ProcessRequest(avb_request_header->cmd,
                       avb_request_header->payload,
                       msg_info.len - sizeof(avb_message),
                       &out_buf,
-                      &out_size);
+                      &out_size,
+                      &error);
   if (rc < 0) {
     TLOGE("Unable to handle request: %d", rc);
     return rc;
   }
 
   // Send response message back to caller
-  AvbMessage* avb_response_message =
-      reinterpret_cast<AvbMessage*>(out_buf.get());
   avb_message avb_response_header = {
-      .cmd = avb_request_header->cmd | AVB_RESP_BIT,
-      .result = avb_response_message->get_error(),
-      {}};
+      .cmd = avb_request_header->cmd | AVB_RESP_BIT, .result = error, {}};
   iovec_t response_iov[2] = {
       {&avb_response_header, sizeof(avb_response_header)},
       {out_buf.get(), out_size},
