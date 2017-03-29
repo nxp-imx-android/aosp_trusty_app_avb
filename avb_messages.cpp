@@ -95,4 +95,28 @@ int GetVersionResponse::Deserialize(const uint8_t* payload,
   return NO_ERROR;
 }
 
+uint32_t PermanentAttributesMessage::GetSerializedSize() const {
+  return attributes_size_;
+}
+
+uint32_t PermanentAttributesMessage::Serialize(uint8_t* payload,
+                                               const uint8_t* end) const {
+  if (static_cast<uint32_t>(end - payload) != attributes_size_)
+    return 0;
+  memcpy(payload, attributes_.get(), attributes_size_);
+  return attributes_size_;
+}
+
+int PermanentAttributesMessage::Deserialize(const uint8_t* payload,
+                                            const uint8_t* end) {
+  if (end < payload)
+    return ERR_NOT_VALID;
+  attributes_size_ = end - payload;
+  attributes_.reset(new uint8_t[attributes_size_]);
+  if (!attributes_.get())
+    return ERR_NO_MEMORY;
+  memcpy(attributes_.get(), payload, attributes_size_);
+  return NO_ERROR;
+}
+
 };  // namespace avb

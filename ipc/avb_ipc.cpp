@@ -30,7 +30,7 @@ extern "C" {
 
 const char kAvbServiceName[] = "com.android.trusty.avb";
 const int kAvbServiceNumBufs = 1;
-const int kAvbServiceBufSize = 1024;
+const int kAvbServiceBufSize = 2048;
 const uint32_t kAvbServiceFlags = IPC_PORT_ALLOW_NS_CONNECT;
 
 avb::AvbManager* g_avb_manager;
@@ -63,6 +63,10 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
     TLOGE("Response size too large: %d\n", *out_size);
     *out_size = 0;
     return ERR_TOO_BIG;
+  }
+
+  if (*out_size == 0) {
+    return NO_ERROR;
   }
 
   out_buf->reset(new uint8_t[*out_size]);
@@ -107,6 +111,20 @@ static int ProcessRequest(uint32_t cmd,
     case AVB_GET_VERSION:
       return ExecuteCommand(
           &AvbManager::GetVersion, in_buf, in_size, out_buf, out_size, error);
+    case READ_PERMANENT_ATTRIBUTES:
+      return ExecuteCommand(&AvbManager::ReadPermanentAttributes,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
+    case WRITE_PERMANENT_ATTRIBUTES:
+      return ExecuteCommand(&AvbManager::WritePermanentAttributes,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
     default:
       return ERR_NOT_VALID;
   }

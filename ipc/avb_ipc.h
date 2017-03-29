@@ -28,6 +28,8 @@ enum avb_command {
   READ_ROLLBACK_INDEX = (0 << AVB_REQ_SHIFT),
   WRITE_ROLLBACK_INDEX = (1 << AVB_REQ_SHIFT),
   AVB_GET_VERSION = (2 << AVB_REQ_SHIFT),
+  READ_PERMANENT_ATTRIBUTES = (3 << AVB_REQ_SHIFT),
+  WRITE_PERMANENT_ATTRIBUTES = (4 << AVB_REQ_SHIFT),
 };
 
 // struct avb_message - Generic message format for communicating with AVB server

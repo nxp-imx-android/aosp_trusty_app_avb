@@ -22,5 +22,8 @@ trusty_app_manifest_t TRUSTY_APP_MANIFEST_ATTRS trusty_app_manifest =
     /* UUID : {905bcb84-2dc4-419d-b951-7255027d318c} */
     { 0x905bcb84, 0x2dc4, 0x419d,
         { 0xb9, 0x51, 0x72, 0x55, 0x02, 0x7d, 0x31, 0x8c } },
-
+	{
+		TRUSTY_APP_CONFIG_MIN_HEAP_SIZE(2 * 4096),
+		TRUSTY_APP_CONFIG_MIN_STACK_SIZE(1 * 4096),
+	},
 };

@@ -24,6 +24,8 @@ extern "C" {
 
 }  // extern C
 
+#include <UniquePtr.h>
+
 // Message serialization objects for communicating with Android
 // Verified Boot app.
 namespace avb {
@@ -35,8 +37,7 @@ enum class AvbError : uint32_t {
   kInternal = 2,  // Error occurred during an operation in Trusty
 };
 
-// Abstract base class of all message objects. Delegates specialized
-// serialization to pure virtual functions implemented by subclasses.
+// Abstract base class of all AVB messages.
 class AvbMessage {
  public:
   // Returns serialized size in bytes of the current state of the
@@ -97,9 +98,9 @@ class RollbackIndexResponse : public AvbMessage {
   uint64_t value_ = 0;  // Value of requested rollback index.
 };
 
-class GetVersionRequest : public AvbMessage {
+class EmptyMessage : public AvbMessage {
  public:
-  GetVersionRequest() {}
+  EmptyMessage() {}
 
   uint32_t GetSerializedSize() const override { return 0; }
   uint32_t Serialize(uint8_t* payload, const uint8_t* end) const override {
@@ -109,6 +110,8 @@ class GetVersionRequest : public AvbMessage {
     return NO_ERROR;
   }
 };
+
+class GetVersionRequest : public EmptyMessage {};
 
 class GetVersionResponse : public AvbMessage {
  public:
@@ -125,6 +128,31 @@ class GetVersionResponse : public AvbMessage {
  private:
   uint32_t version_ = 0;
 };
+
+class PermanentAttributesMessage : public AvbMessage {
+ public:
+  PermanentAttributesMessage() {}
+
+  uint32_t GetSerializedSize() const override;
+  uint32_t Serialize(uint8_t* payload, const uint8_t* end) const override;
+  int Deserialize(const uint8_t* payload, const uint8_t* end) override;
+
+  uint32_t get_attributes_size() const { return attributes_size_; }
+  uint8_t* get_attributes_buf() const { return attributes_.get(); }
+  int set_attributes_buf(const uint8_t* buf, const uint32_t size) {
+    return Deserialize(buf, buf + size);
+  }
+
+ private:
+  UniquePtr<uint8_t[]> attributes_;
+  uint32_t attributes_size_ = 0;
+};
+
+class WritePermanentAttributesRequest : public PermanentAttributesMessage {};
+class WritePermanentAttributesResponse : public EmptyMessage {};
+
+class ReadPermanentAttributesRequest : public EmptyMessage {};
+class ReadPermanentAttributesResponse : public PermanentAttributesMessage {};
 
 }  // namespace avb
 

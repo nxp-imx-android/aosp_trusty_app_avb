@@ -66,6 +66,12 @@ class AvbManager {
   // be versioned.
   void GetVersion(const GetVersionRequest& request,
                   GetVersionResponse* response);
+  // The Avb service provides storage for Android Things permanent attributes
+  // structure, but these must still be verified against write-once fuses.
+  void ReadPermanentAttributes(const ReadPermanentAttributesRequest& request,
+                               ReadPermanentAttributesResponse* response);
+  void WritePermanentAttributes(const WritePermanentAttributesRequest& request,
+                                WritePermanentAttributesResponse* response);
 
  private:
   UniquePtr<SecureStorageInterface> storage_;

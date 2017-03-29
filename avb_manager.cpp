@@ -31,6 +31,8 @@ const unsigned int kRollbackSlotMax = 32;
 
 static const uint32_t kAvbVersion = 1;
 static const char* kAvbRollbackFilename = "avb.rollback";
+static const unsigned int kPermanentAttributesLengthMax = 2048;
+static const char* kPermanentAttributesFilename = "avb.ppa";
 static const unsigned int kStorageIdLengthMax = 64;
 
 static const uint32_t kTypeMask = 0xF000;
@@ -190,6 +192,64 @@ void AvbManager::WriteRollbackIndex(const RollbackIndexRequest& request,
 void AvbManager::GetVersion(const GetVersionRequest& request,
                             GetVersionResponse* response) {
   response->set_version(kAvbVersion);
+}
+
+void AvbManager::ReadPermanentAttributes(
+    const ReadPermanentAttributesRequest& request,
+    ReadPermanentAttributesResponse* response) {
+  int rc = storage_->open(kPermanentAttributesFilename);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to open attributes file: %d\n", rc);
+    return;
+  }
+
+  // Read permanent product attributes
+  UniquePtr<uint8_t[]> attributes(new uint8_t[kPermanentAttributesLengthMax]);
+  rc = storage_->read(0, attributes.get(), kPermanentAttributesLengthMax);
+  if (rc <= 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: %s attributes file [%d]\n",
+          rc == 0 ? "missing" : "accessing",
+          rc);
+    return;
+  }
+  uint32_t attributes_size = static_cast<uint32_t>(rc);
+  response->set_attributes_buf(attributes.get(), attributes_size);
+}
+
+void AvbManager::WritePermanentAttributes(
+    const WritePermanentAttributesRequest& request,
+    WritePermanentAttributesResponse* response) {
+  int rc = storage_->open(kPermanentAttributesFilename);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to open attributes file: %d\n", rc);
+    return;
+  }
+  uint64_t size;
+  rc = storage_->get_file_size(&size);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to get size of attributes file: %d\n", rc);
+    return;
+  }
+
+  if (size) {
+    response->set_error(AvbError::kInvalid);
+    TLOGE("Error: Permanent attributes already set!\n");
+    return;
+  }
+  // New file, write serialized permanent product attributes to storage
+  uint32_t attributes_size = request.get_attributes_size();
+  uint8_t* attributes = request.get_attributes_buf();
+  rc = storage_->write(0, attributes, attributes_size);
+
+  if (rc < 0 || static_cast<size_t>(rc) < attributes_size) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: accessing storage object [%d]\n", rc);
+    return;
+  }
 }
 
 };  // namespace avb
