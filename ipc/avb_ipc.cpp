@@ -125,6 +125,20 @@ static int ProcessRequest(uint32_t cmd,
                             out_buf,
                             out_size,
                             error);
+    case READ_LOCK_STATE:
+      return ExecuteCommand(&AvbManager::ReadLockState,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
+    case WRITE_LOCK_STATE:
+      return ExecuteCommand(&AvbManager::WriteLockState,
+                            in_buf,
+                            in_size,
+                            out_buf,
+                            out_size,
+                            error);
     default:
       return ERR_NOT_VALID;
   }

@@ -154,6 +154,27 @@ class WritePermanentAttributesResponse : public EmptyMessage {};
 class ReadPermanentAttributesRequest : public EmptyMessage {};
 class ReadPermanentAttributesResponse : public PermanentAttributesMessage {};
 
+class LockStateMessage : public AvbMessage {
+ public:
+  LockStateMessage() {}
+
+  uint32_t GetSerializedSize() const override;
+  uint32_t Serialize(uint8_t* payload, const uint8_t* end) const override;
+  int Deserialize(const uint8_t* payload, const uint8_t* end) override;
+
+  uint8_t get_lock_state() const { return lock_state_; }
+  void set_lock_state(uint8_t lock_state) { lock_state_ = lock_state; }
+
+ private:
+  uint8_t lock_state_ = 0;
+};
+
+class ReadLockStateRequest : public EmptyMessage {};
+class ReadLockStateResponse : public LockStateMessage {};
+
+class WriteLockStateRequest : public LockStateMessage {};
+class WriteLockStateResponse : public EmptyMessage {};
+
 }  // namespace avb
 
 #endif  // AVB_MESSAGES_H_

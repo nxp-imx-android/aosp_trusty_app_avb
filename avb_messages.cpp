@@ -119,4 +119,25 @@ int PermanentAttributesMessage::Deserialize(const uint8_t* payload,
   return NO_ERROR;
 }
 
+uint32_t LockStateMessage::GetSerializedSize() const {
+  return sizeof(lock_state_);
+}
+
+uint32_t LockStateMessage::Serialize(uint8_t* payload,
+                                     const uint8_t* end) const {
+  if (payload + GetSerializedSize() > end)
+    return 0;
+  memcpy(payload, &lock_state_, sizeof(lock_state_));
+  payload += sizeof(lock_state_);
+  return GetSerializedSize();
+}
+
+int LockStateMessage::Deserialize(const uint8_t* payload, const uint8_t* end) {
+  if (payload + GetSerializedSize() != end)
+    return ERR_NOT_VALID;
+  memcpy(&lock_state_, payload, sizeof(lock_state_));
+  payload += sizeof(lock_state_);
+  return NO_ERROR;
+}
+
 };  // namespace avb

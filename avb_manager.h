@@ -72,8 +72,14 @@ class AvbManager {
                                ReadPermanentAttributesResponse* response);
   void WritePermanentAttributes(const WritePermanentAttributesRequest& request,
                                 WritePermanentAttributesResponse* response);
+  void ReadLockState(const ReadLockStateRequest& request,
+                     ReadLockStateResponse* response);
+  void WriteLockState(const WriteLockStateRequest& request,
+                      WriteLockStateResponse* response);
 
  private:
+  int DeleteRollbackIndexFiles();
+
   UniquePtr<SecureStorageInterface> storage_;
 };
 

@@ -30,6 +30,8 @@ enum avb_command {
   AVB_GET_VERSION = (2 << AVB_REQ_SHIFT),
   READ_PERMANENT_ATTRIBUTES = (3 << AVB_REQ_SHIFT),
   WRITE_PERMANENT_ATTRIBUTES = (4 << AVB_REQ_SHIFT),
+  READ_LOCK_STATE = (5 << AVB_REQ_SHIFT),
+  WRITE_LOCK_STATE = (6 << AVB_REQ_SHIFT),
 };
 
 // struct avb_message - Generic message format for communicating with AVB server

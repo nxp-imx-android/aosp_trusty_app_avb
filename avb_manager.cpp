@@ -33,6 +33,7 @@ static const uint32_t kAvbVersion = 1;
 static const char* kAvbRollbackFilename = "avb.rollback";
 static const unsigned int kPermanentAttributesLengthMax = 2048;
 static const char* kPermanentAttributesFilename = "avb.ppa";
+static const char* kLockStateFile = "avb.lock_state";
 static const unsigned int kStorageIdLengthMax = 64;
 
 static const uint32_t kTypeMask = 0xF000;
@@ -250,6 +251,98 @@ void AvbManager::WritePermanentAttributes(
     TLOGE("Error: accessing storage object [%d]\n", rc);
     return;
   }
+}
+
+void AvbManager::ReadLockState(const ReadLockStateRequest& request,
+                               ReadLockStateResponse* response) {
+  int rc = storage_->open(kLockStateFile);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to open lock state file: %d\n", rc);
+    return;
+  }
+  uint64_t size;
+  rc = storage_->get_file_size(&size);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to get size of lock state file: %d\n", rc);
+    return;
+  }
+
+  uint8_t lock_state = 1;
+  if (size == 0) {
+    // No lock state found, assume initial state is locked and write it
+    rc = storage_->write(0, &lock_state, sizeof(lock_state));
+  } else {
+    rc = storage_->read(0, &lock_state, sizeof(lock_state));
+  }
+  if (rc < 0 || static_cast<size_t>(rc) < sizeof(lock_state)) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: accessing storage object [%d]\n", rc);
+    return;
+  }
+  response->set_lock_state(lock_state);
+}
+
+void AvbManager::WriteLockState(const WriteLockStateRequest& request,
+                                WriteLockStateResponse* response) {
+  // Only 0 and 1 are valid lock states
+  uint8_t request_lock_state = request.get_lock_state();
+  if (request_lock_state != 0 && request_lock_state != 1) {
+    response->set_error(AvbError::kInvalid);
+    TLOGE("Error: invalid lock state requested: %d\n", request_lock_state);
+    return;
+  }
+
+  int rc = storage_->open(kLockStateFile);
+  if (rc < 0) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: failed to open lock state file: %d\n", rc);
+    return;
+  }
+
+  // Try to read existing lock state
+  uint8_t stored_lock_state = 0xFF;
+  storage_->read(0, &stored_lock_state, sizeof(stored_lock_state));
+
+  // If no lock state file was found, or the device is changing lock state,
+  // clear rollback index data
+  if (stored_lock_state != request_lock_state) {
+    if (DeleteRollbackIndexFiles() < 0) {
+      response->set_error(AvbError::kInternal);
+      TLOGE("Error: clearing rollback index data\n");
+      return;
+    }
+  }
+
+  // Write new lock state
+  rc = storage_->write(0, &request_lock_state, sizeof(request_lock_state));
+  if (rc < 0 || static_cast<size_t>(rc) < sizeof(request_lock_state)) {
+    response->set_error(AvbError::kInternal);
+    TLOGE("Error: accessing storage object [%d]\n", rc);
+    return;
+  }
+}
+
+// Rollback counters are stored in files avb.rollback.{0..F}. When a device
+// changes lock state, data in rollback index files must be deleted.
+int AvbManager::DeleteRollbackIndexFiles() {
+  char filename[kStorageIdLengthMax];
+  char postfix[4];
+  int rc = NO_ERROR;
+
+  for (unsigned int i = 0x0; i <= 0xF; ++i) {
+    strcpy(filename, kAvbRollbackFilename);
+    snprintf(postfix, 4, ".%01X", i);
+    strcat(filename, postfix);
+    int storage_rc = storage_->delete_file(filename);
+    if (storage_rc < 0 && storage_rc != ERR_NOT_FOUND) {
+      rc = storage_rc;
+      TLOGE("Error: deleting file %s: %d\n", filename, rc);
+      continue;
+    }
+  }
+  return rc;
 }
 
 };  // namespace avb
