@@ -43,10 +43,10 @@ namespace avb {
 template <typename Request, typename Response>
 static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
                                                         Response*),
-                          uint8_t* in_buf,
+                          const uint8_t* in_buf,
                           uint32_t in_size,
-                          UniquePtr<uint8_t[]>& out_buf,
-                          uint32_t& out_size) {
+                          UniquePtr<uint8_t[]>* out_buf,
+                          uint32_t* out_size) {
   Request req;
   int rc = req.Deserialize(in_buf, in_buf + in_size);
   if (rc < 0) {
@@ -56,20 +56,20 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
   Response rsp;
   (g_avb_manager->*operation)(req, &rsp);
 
-  out_size = rsp.GetSerializedSize();
-  if (out_size > kAvbServiceBufSize) {
-    TLOGE("Response size too large: %d\n", out_size);
-    out_size = 0;
+  *out_size = rsp.GetSerializedSize();
+  if (*out_size > kAvbServiceBufSize) {
+    TLOGE("Response size too large: %d\n", *out_size);
+    *out_size = 0;
     return ERR_TOO_BIG;
   }
 
-  out_buf.reset(new uint8_t[out_size]);
-  if (out_buf.get() == nullptr) {
-    out_size = 0;
+  out_buf->reset(new uint8_t[*out_size]);
+  if (out_buf->get() == nullptr) {
+    *out_size = 0;
     return ERR_NO_MEMORY;
   }
 
-  if (rsp.Serialize(out_buf.get(), out_buf.get() + out_size) != out_size) {
+  if (rsp.Serialize(out_buf->get(), out_buf->get() + *out_size) != *out_size) {
     TLOGE("Error serializing response message\n");
     return ERR_NOT_VALID;
   }
@@ -82,10 +82,10 @@ static int ExecuteCommand(void (AvbManager::*operation)(const Request&,
 // the response or deserializing the request. Avb specific errors are sent in
 // the response.
 static int ProcessRequest(uint32_t cmd,
-                          uint8_t* in_buf,
+                          const uint8_t* in_buf,
                           uint32_t in_size,
-                          UniquePtr<uint8_t[]>& out_buf,
-                          uint32_t& out_size) {
+                          UniquePtr<uint8_t[]>* out_buf,
+                          uint32_t* out_size) {
   switch (cmd) {
     case READ_ROLLBACK_INDEX:
       return ExecuteCommand(
@@ -139,8 +139,8 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
   rc = ProcessRequest(avb_request_header->cmd,
                       avb_request_header->payload,
                       msg_info.len - sizeof(avb_message),
-                      out_buf,
-                      out_size);
+                      &out_buf,
+                      &out_size);
   if (rc < 0) {
     TLOGE("Unable to handle request: %d", rc);
     return rc;
