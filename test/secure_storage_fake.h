@@ -23,6 +23,7 @@ namespace avb {
 class SecureStorageFake : public SecureStorageInterface {
  public:
   int open(const char* name) override { return 0; }
+  int delete_file(const char* name) override { return 0; }
   int read(uint64_t off, void* buf, size_t size) const override {
     *(uint64_t*)buf = 1;
     return size;

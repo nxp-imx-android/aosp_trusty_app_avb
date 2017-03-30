@@ -32,9 +32,10 @@ class SecureStorage : public SecureStorageInterface {
  public:
   ~SecureStorage() override;
   int open(const char* name) override;
-  virtual int read(uint64_t off, void* buf, size_t size) const override;
-  virtual int get_file_size(uint64_t* size) const override;
-  virtual int write(uint64_t off, const void* buf, size_t size) const override;
+  int delete_file(const char* name) override;
+  int read(uint64_t off, void* buf, size_t size) const override;
+  int get_file_size(uint64_t* size) const override;
+  int write(uint64_t off, const void* buf, size_t size) const override;
 
  private:
   void close();

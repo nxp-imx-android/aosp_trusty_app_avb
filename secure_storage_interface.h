@@ -41,6 +41,11 @@ class SecureStorageInterface {
   // Returns NO_ERROR on success, negative error code on failure.
   virtual int open(const char* filename) = 0;
 
+  // Deletes a file in secure storage named |filename|.
+  //
+  // Returns NO_ERROR on success, negative error code on failure.
+  virtual int delete_file(const char* filename) = 0;
+
   // Reads |size| bytes into |buf| from the file starting at offset |off|. The
   // file must have been previously opened by open().
   //
