@@ -32,6 +32,7 @@ const char kAvbServiceName[] = "com.android.trusty.avb";
 const int kAvbServiceNumBufs = 1;
 const int kAvbServiceBufSize = 2048;
 const uint32_t kAvbServiceFlags = IPC_PORT_ALLOW_NS_CONNECT;
+static bool boot_state_locked = false;
 
 avb::AvbManager* g_avb_manager;
 
@@ -93,6 +94,16 @@ static int ProcessRequest(uint32_t cmd,
                           UniquePtr<uint8_t[]>* out_buf,
                           uint32_t* out_size,
                           AvbError* error) {
+  if (boot_state_locked) {
+    switch (cmd) {
+      case WRITE_ROLLBACK_INDEX:
+      case WRITE_PERMANENT_ATTRIBUTES:
+      case WRITE_LOCK_STATE:
+        *out_size = 0;
+        *error = AvbError::kInvalid;
+        return NO_ERROR;
+    }
+  }
   switch (cmd) {
     case READ_ROLLBACK_INDEX:
       return ExecuteCommand(&AvbManager::ReadRollbackIndex,
@@ -139,6 +150,12 @@ static int ProcessRequest(uint32_t cmd,
                             out_buf,
                             out_size,
                             error);
+    case LOCK_BOOT_STATE:
+      *out_size = 0;
+      *error = AvbError::kNone;
+      boot_state_locked = true;
+      return NO_ERROR;
+
     default:
       return ERR_NOT_VALID;
   }
