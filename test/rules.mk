@@ -1,4 +1,4 @@
-# Copyright (C) 2016 The Android Open Source Project
+# Copyright (C) 2018 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,31 +15,23 @@
 
 LOCAL_DIR := $(GET_LOCAL_DIR)
 
-MODULE := $(LOCAL_DIR)
+HOST_TEST := avb_test
 
-MODULE_SRCS += \
-	$(LOCAL_DIR)/manifest.c \
-	$(LOCAL_DIR)/avb_messages.cpp \
-	$(LOCAL_DIR)/avb_manager.cpp \
-	$(LOCAL_DIR)/secure_storage.cpp \
+HOST_SRCS := \
+	$(LOCAL_DIR)/../avb_manager.cpp \
+	$(LOCAL_DIR)/../avb_messages.cpp \
+	$(LOCAL_DIR)/unittest.cpp \
 
-MODULE_CPPFLAGS += -std=c++11
+HOST_INCLUDE_DIRS := \
+	lib/include \
+	app/avb \
+	lib/lib/libstdc++-trusty/include \
 
-IPC := ipc
+HOST_FLAGS := -Wpointer-arith -fno-permissive \
+	-Wno-deprecated-declarations -fno-exceptions \
+	-include external/lk/include/err.h -DSTORAGE_FAKE \
 
-MODULE_DEPS += \
-	app/trusty \
-	lib/libc-trusty \
-	lib/libstdc++-trusty \
-	lib/storage \
+HOST_LIBS := \
+	stdc++ \
 
-# Build the test.
-MODULE_DEPS += app/avb/test
-
-MODULE_INCLUDES += \
-	$(LOCAL_DIR)
-
-include $(LOCAL_DIR)/$(IPC)/rules.mk
-
-include make/module.mk
-
+include make/host_test.mk
