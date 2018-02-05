@@ -16,7 +16,7 @@
 
 extern "C" {
 
-#include <err.h>
+#include <uapi/err.h>
 
 #include <trusty_std.h>
 

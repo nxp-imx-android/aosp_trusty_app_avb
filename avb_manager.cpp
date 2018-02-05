@@ -18,7 +18,7 @@
 
 extern "C" {
 
-#include <err.h>
+#include <uapi/err.h>
 #include <string.h>
 
 }  // extern C

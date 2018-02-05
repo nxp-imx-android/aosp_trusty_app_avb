@@ -29,7 +29,7 @@ HOST_INCLUDE_DIRS := \
 
 HOST_FLAGS := -Wpointer-arith -fno-permissive \
 	-Wno-deprecated-declarations -fno-exceptions \
-	-include external/lk/include/err.h -DSTORAGE_FAKE \
+	-DSTORAGE_FAKE \
 
 HOST_LIBS := \
 	stdc++ \

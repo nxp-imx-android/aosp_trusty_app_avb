@@ -11,7 +11,9 @@ INCLUDES := \
 	-I $(BASE)/lib/include \
 	-I $(AVBDIR) \
 	-I $(BASE)/lib/lib/libstdc++-trusty/include \
-	-include $(BASE)/external/lk/include/err.h
+	-I $(BASE)/external/lk/include/uapi \
+	-I $(BASE)/lib/include/user \
+
 DEFINES := -DSTORAGE_FAKE
 SOURCES := \
 	$(AVBDIR)/avb_manager.cpp \
