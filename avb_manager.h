@@ -17,11 +17,7 @@
 #ifndef AVB_MANAGER_H_
 #define AVB_MANAGER_H_
 
-extern "C" {
-
 #include <stdio.h>
-
-}  // extern C
 
 #include <UniquePtr.h>
 

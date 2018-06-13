@@ -17,12 +17,8 @@
 #ifndef SECURE_STORAGE_H_
 #define SECURE_STORAGE_H_
 
-extern "C" {
-
 #include <stddef.h>
 #include <stdint.h>
-
-}  // extern "C"
 
 namespace avb {
 

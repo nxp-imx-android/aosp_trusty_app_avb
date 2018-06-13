@@ -17,12 +17,8 @@
 #ifndef AVB_MESSAGES_H_
 #define AVB_MESSAGES_H_
 
-extern "C" {
-
-#include <uapi/err.h>
 #include <stdint.h>
-
-}  // extern C
+#include <uapi/err.h>
 
 #include <UniquePtr.h>
 

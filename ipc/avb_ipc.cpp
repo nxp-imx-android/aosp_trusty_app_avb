@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-extern "C" {
-
+#include <trusty_ipc.h>
 #include <uapi/err.h>
-
-#include <trusty_std.h>
-
-}  // extern C
-
 #include <UniquePtr.h>
 
 #include "avb_ipc.h"

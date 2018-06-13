@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-extern "C" {
-
 #include <trusty_unittest.h>
-
-}  // extern C
 
 // TODO(b/34062056): create a generic Trusty log.h file, so this kind of
 // conflict doesn't happen.

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-extern "C" {
-
 #include <errno.h>
 
 #include <lib/storage/storage.h>
-
-}  // extern "C"
 
 #include "secure_storage_interface.h"
 

@@ -16,12 +16,8 @@
 
 #include "avb_messages.h"
 
-extern "C" {
-
 #include <stdio.h>
 #include <string.h>
-
-}  // extern C
 
 namespace avb {
 

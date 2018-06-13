@@ -16,12 +16,8 @@
 
 #include "avb_manager.h"
 
-extern "C" {
-
-#include <uapi/err.h>
 #include <string.h>
-
-}  // extern C
+#include <uapi/err.h>
 
 #include "secure_storage_interface.h"
 
