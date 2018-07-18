@@ -26,21 +26,19 @@
 
 #define LOG_TAG "avb"
 
-#define TLOGE(fmt, ...) \
-  fprintf(stderr, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, ##__VA_ARGS__)
-#define TLOGI(fmt, ...) \
-  fprintf(stdout, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, ##__VA_ARGS__)
-#define TLOGD(fmt, ...)         \
-  while (0) {                   \
-    if (DEBUG) {                \
-      fprintf(stdout,           \
-              "%s:%s:%d: " fmt, \
-              LOG_TAG,          \
-              __func__,         \
-              __LINE__,         \
-              ##__VA_ARGS__);   \
-    }                           \
-  }
+#define TLOGE(fmt, ...)                                            \
+    fprintf(stderr, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
+            ##__VA_ARGS__)
+#define TLOGI(fmt, ...)                                            \
+    fprintf(stdout, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
+            ##__VA_ARGS__)
+#define TLOGD(fmt, ...)                                                    \
+    while (0) {                                                            \
+        if (DEBUG) {                                                       \
+            fprintf(stdout, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
+                    ##__VA_ARGS__);                                        \
+        }                                                                  \
+    }
 
 extern const unsigned int kRollbackSlotMax;
 
@@ -48,35 +46,36 @@ namespace avb {
 
 // Implements request callbacks
 class AvbManager {
- public:
-  // AvbManager takes ownership of |storage|, so |storage| will be deleted
-  // when AvbManager is destructed.
-  AvbManager(SecureStorageInterface* storage) : storage_(storage) {}
+public:
+    // AvbManager takes ownership of |storage|, so |storage| will be deleted
+    // when AvbManager is destructed.
+    AvbManager(SecureStorageInterface* storage) : storage_(storage) {}
 
-  void ReadRollbackIndex(const RollbackIndexRequest& request,
-                         RollbackIndexResponse* response);
-  void WriteRollbackIndex(const RollbackIndexRequest& request,
-                          RollbackIndexResponse* response);
-  // Client is responsible for managing versioning, by sending an initial
-  // "GetVersion" request. Note this means that the "GetVersion" request cannot
-  // be versioned.
-  void GetVersion(const GetVersionRequest& request,
-                  GetVersionResponse* response);
-  // The Avb service provides storage for Android Things permanent attributes
-  // structure, but these must still be verified against write-once fuses.
-  void ReadPermanentAttributes(const ReadPermanentAttributesRequest& request,
-                               ReadPermanentAttributesResponse* response);
-  void WritePermanentAttributes(const WritePermanentAttributesRequest& request,
-                                WritePermanentAttributesResponse* response);
-  void ReadLockState(const ReadLockStateRequest& request,
-                     ReadLockStateResponse* response);
-  void WriteLockState(const WriteLockStateRequest& request,
-                      WriteLockStateResponse* response);
+    void ReadRollbackIndex(const RollbackIndexRequest& request,
+                           RollbackIndexResponse* response);
+    void WriteRollbackIndex(const RollbackIndexRequest& request,
+                            RollbackIndexResponse* response);
+    // Client is responsible for managing versioning, by sending an initial
+    // "GetVersion" request. Note this means that the "GetVersion" request
+    // cannot be versioned.
+    void GetVersion(const GetVersionRequest& request,
+                    GetVersionResponse* response);
+    // The Avb service provides storage for Android Things permanent attributes
+    // structure, but these must still be verified against write-once fuses.
+    void ReadPermanentAttributes(const ReadPermanentAttributesRequest& request,
+                                 ReadPermanentAttributesResponse* response);
+    void WritePermanentAttributes(
+            const WritePermanentAttributesRequest& request,
+            WritePermanentAttributesResponse* response);
+    void ReadLockState(const ReadLockStateRequest& request,
+                       ReadLockStateResponse* response);
+    void WriteLockState(const WriteLockStateRequest& request,
+                        WriteLockStateResponse* response);
 
- private:
-  int DeleteRollbackIndexFiles();
+private:
+    int DeleteRollbackIndexFiles();
 
-  UniquePtr<SecureStorageInterface> storage_;
+    UniquePtr<SecureStorageInterface> storage_;
 };
 
 }  // namespace avb

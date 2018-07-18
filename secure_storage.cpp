@@ -19,69 +19,66 @@
 namespace avb {
 
 SecureStorage::~SecureStorage() {
-  close();
+    close();
 }
 
 int SecureStorage::open(const char* name) {
-  // Close any storage session/file still open
-  close();
-  error_ = storage_open_session(&session_handle_, STORAGE_CLIENT_TP_PORT);
-  if (error_ < 0) {
+    // Close any storage session/file still open
+    close();
+    error_ = storage_open_session(&session_handle_, STORAGE_CLIENT_TP_PORT);
+    if (error_ < 0) {
+        return error_;
+    }
+    error_ = storage_open_file(session_handle_, &file_handle_, name,
+                               STORAGE_FILE_OPEN_CREATE, 0 /* don't commit */);
     return error_;
-  }
-  error_ = storage_open_file(session_handle_,
-                             &file_handle_,
-                             name,
-                             STORAGE_FILE_OPEN_CREATE,
-                             0 /* don't commit */);
-  return error_;
 }
 
 int SecureStorage::delete_file(const char* name) {
-  // Reuse existing storage session if possible
-  if (session_handle_ == 0) {
-    error_ = storage_open_session(&session_handle_, STORAGE_CLIENT_TP_PORT);
-  }
-  if (error_ < 0) {
-    return error_;
-  }
-  return storage_delete_file(session_handle_, name, STORAGE_OP_COMPLETE);
+    // Reuse existing storage session if possible
+    if (session_handle_ == 0) {
+        error_ = storage_open_session(&session_handle_, STORAGE_CLIENT_TP_PORT);
+    }
+    if (error_ < 0) {
+        return error_;
+    }
+    return storage_delete_file(session_handle_, name, STORAGE_OP_COMPLETE);
 }
 
 int SecureStorage::read(uint64_t off, void* buf, size_t size) const {
-  if (error_ < 0) {
-    return error_;
-  }
-  return storage_read(file_handle_, off, buf, size);
+    if (error_ < 0) {
+        return error_;
+    }
+    return storage_read(file_handle_, off, buf, size);
 }
 
 int SecureStorage::get_file_size(uint64_t* size) const {
-  if (error_ < 0) {
-    return error_;
-  }
-  return storage_get_file_size(file_handle_, size);
+    if (error_ < 0) {
+        return error_;
+    }
+    return storage_get_file_size(file_handle_, size);
 }
 
 int SecureStorage::write(uint64_t off, const void* buf, size_t size) const {
-  if (error_ < 0) {
-    return error_;
-  }
-  return storage_write(file_handle_, off, buf, size, STORAGE_OP_COMPLETE);
+    if (error_ < 0) {
+        return error_;
+    }
+    return storage_write(file_handle_, off, buf, size, STORAGE_OP_COMPLETE);
 }
 
 void SecureStorage::close() {
-  if (error_ < 0) {
-    return;
-  }
-  if (file_handle_) {
-    storage_close_file(file_handle_);
-  }
-  if (session_handle_) {
-    storage_close_session(session_handle_);
-  }
-  file_handle_ = 0;
-  session_handle_ = 0;
-  error_ = -EINVAL;
+    if (error_ < 0) {
+        return;
+    }
+    if (file_handle_) {
+        storage_close_file(file_handle_);
+    }
+    if (session_handle_) {
+        storage_close_session(session_handle_);
+    }
+    file_handle_ = 0;
+    session_handle_ = 0;
+    error_ = -EINVAL;
 }
 
 }  // namespace avb

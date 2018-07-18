@@ -24,110 +24,108 @@
 namespace avb {
 
 void BasicReadTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = 0;
-  uint64_t value = 0;
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.ReadRollbackIndex(request, &response);
-  EXPECT_EQ(AvbError::kNone, response.get_error(), "Read failed");
-  EXPECT_EQ(1, response.get_value(), "Did not read expected value");
+    uint32_t slot = 0;
+    uint64_t value = 0;
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.ReadRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kNone, response.get_error(), "Read failed");
+    EXPECT_EQ(1, response.get_value(), "Did not read expected value");
 
-  TEST_END
+    TEST_END
 }
 
 void ValidWriteTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = 0;
-  uint64_t value = 2;  // Read always returns 1
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.WriteRollbackIndex(request, &response);
-  EXPECT_EQ(AvbError::kNone, response.get_error(), "Write failed");
-  EXPECT_EQ(2, response.get_value(), "Did not write expected value");
+    uint32_t slot = 0;
+    uint64_t value = 2;  // Read always returns 1
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.WriteRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kNone, response.get_error(), "Write failed");
+    EXPECT_EQ(2, response.get_value(), "Did not write expected value");
 
-  TEST_END
+    TEST_END
 }
 
 void InvalidWriteTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = 0;
-  uint64_t value = 0;  // Read always returns 1
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.WriteRollbackIndex(request, &response);
-  EXPECT_EQ(AvbError::kInvalid,
-            response.get_error(),
-            "Allowed writing index value less than existing value");
-  EXPECT_EQ(1,
-            response.get_value(),
-            "Did not read expected value after failed write");
+    uint32_t slot = 0;
+    uint64_t value = 0;  // Read always returns 1
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.WriteRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kInvalid, response.get_error(),
+              "Allowed writing index value less than existing value");
+    EXPECT_EQ(1, response.get_value(),
+              "Did not read expected value after failed write");
 
-  TEST_END
+    TEST_END
 }
 
 void SlotUpperBitsSetTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = 0x00010000;
-  uint64_t value = 0;
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.ReadRollbackIndex(request, &response);
-  EXPECT_EQ(AvbError::kInvalid, response.get_error(), "Slot was not rejected");
+    uint32_t slot = 0x00010000;
+    uint64_t value = 0;
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.ReadRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kInvalid, response.get_error(),
+              "Slot was not rejected");
 
-  TEST_END
+    TEST_END
 }
 
 void SlotMaxValueTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = kRollbackSlotMax + 1;
-  uint64_t value = 0;
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.ReadRollbackIndex(request, &response);
-  EXPECT_EQ(AvbError::kInvalid,
-            response.get_error(),
-            "Failed to reject write to slot > max slot");
+    uint32_t slot = kRollbackSlotMax + 1;
+    uint64_t value = 0;
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.ReadRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kInvalid, response.get_error(),
+              "Failed to reject write to slot > max slot");
 
-  TEST_END
+    TEST_END
 }
 
 void SlotFlagTest() {
-  TEST_BEGIN(__func__)
+    TEST_BEGIN(__func__)
 
-  uint32_t slot = 0x0000f000;
-  uint64_t value = 0;
-  RollbackIndexRequest request(slot, value);
-  RollbackIndexResponse response;
-  AvbManager avb_manager(new SecureStorageFake);
-  avb_manager.ReadRollbackIndex(request, &response);
-  EXPECT_EQ(
-      AvbError::kNone, response.get_error(), "Could not validate 0xf flag");
+    uint32_t slot = 0x0000f000;
+    uint64_t value = 0;
+    RollbackIndexRequest request(slot, value);
+    RollbackIndexResponse response;
+    AvbManager avb_manager(new SecureStorageFake);
+    avb_manager.ReadRollbackIndex(request, &response);
+    EXPECT_EQ(AvbError::kNone, response.get_error(),
+              "Could not validate 0xf flag");
 
-  TEST_END
+    TEST_END
 }
 
 }  // namespace avb
 
 int main() {
-  TLOGI("Welcome to AVB service unit test -------------------------\n\n");
-  avb::BasicReadTest();
-  avb::ValidWriteTest();
-  avb::InvalidWriteTest();
-  avb::SlotUpperBitsSetTest();
-  avb::SlotMaxValueTest();
-  avb::SlotFlagTest();
-  TLOGI("AVB service unit tests done ------------------------------\n\n");
-  TLOGI(
-      "PASSED: %u, FAILED: %u\n", _tests_total - _tests_failed, _tests_failed);
+    TLOGI("Welcome to AVB service unit test -------------------------\n\n");
+    avb::BasicReadTest();
+    avb::ValidWriteTest();
+    avb::InvalidWriteTest();
+    avb::SlotUpperBitsSetTest();
+    avb::SlotMaxValueTest();
+    avb::SlotFlagTest();
+    TLOGI("AVB service unit tests done ------------------------------\n\n");
+    TLOGI("PASSED: %u, FAILED: %u\n", _tests_total - _tests_failed,
+          _tests_failed);
 }

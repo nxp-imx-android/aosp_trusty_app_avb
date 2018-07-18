@@ -22,118 +22,118 @@
 namespace avb {
 
 uint32_t RollbackIndexRequest::GetSerializedSize() const {
-  return sizeof(value_) + sizeof(slot_);
+    return sizeof(value_) + sizeof(slot_);
 }
 
 uint32_t RollbackIndexRequest::Serialize(uint8_t* payload,
                                          const uint8_t* end) const {
-  if (payload + GetSerializedSize() > end)
-    return 0;
-  memcpy(payload, &value_, sizeof(value_));
-  payload += sizeof(value_);
-  memcpy(payload, &slot_, sizeof(slot_));
-  payload += sizeof(slot_);
-  return GetSerializedSize();
+    if (payload + GetSerializedSize() > end)
+        return 0;
+    memcpy(payload, &value_, sizeof(value_));
+    payload += sizeof(value_);
+    memcpy(payload, &slot_, sizeof(slot_));
+    payload += sizeof(slot_);
+    return GetSerializedSize();
 }
 
 int RollbackIndexRequest::Deserialize(const uint8_t* payload,
                                       const uint8_t* end) {
-  if (payload + GetSerializedSize() != end)
-    return ERR_NOT_VALID;
-  memcpy(&value_, payload, sizeof(value_));
-  payload += sizeof(value_);
-  memcpy(&slot_, payload, sizeof(slot_));
-  payload += sizeof(slot_);
-  return NO_ERROR;
+    if (payload + GetSerializedSize() != end)
+        return ERR_NOT_VALID;
+    memcpy(&value_, payload, sizeof(value_));
+    payload += sizeof(value_);
+    memcpy(&slot_, payload, sizeof(slot_));
+    payload += sizeof(slot_);
+    return NO_ERROR;
 }
 
 uint32_t RollbackIndexResponse::GetSerializedSize() const {
-  return sizeof(value_);
+    return sizeof(value_);
 }
 
 uint32_t RollbackIndexResponse::Serialize(uint8_t* payload,
                                           const uint8_t* end) const {
-  if (payload + GetSerializedSize() > end)
-    return 0;
-  memcpy(payload, &value_, sizeof(value_));
-  payload += sizeof(value_);
-  return GetSerializedSize();
+    if (payload + GetSerializedSize() > end)
+        return 0;
+    memcpy(payload, &value_, sizeof(value_));
+    payload += sizeof(value_);
+    return GetSerializedSize();
 }
 
 int RollbackIndexResponse::Deserialize(const uint8_t* payload,
                                        const uint8_t* end) {
-  if (payload + GetSerializedSize() != end)
-    return ERR_NOT_VALID;
-  memcpy(&value_, payload, sizeof(value_));
-  payload += sizeof(value_);
-  return NO_ERROR;
+    if (payload + GetSerializedSize() != end)
+        return ERR_NOT_VALID;
+    memcpy(&value_, payload, sizeof(value_));
+    payload += sizeof(value_);
+    return NO_ERROR;
 }
 
 uint32_t GetVersionResponse::GetSerializedSize() const {
-  return sizeof(version_);
+    return sizeof(version_);
 }
 
 uint32_t GetVersionResponse::Serialize(uint8_t* payload,
                                        const uint8_t* end) const {
-  if (payload + GetSerializedSize() > end)
-    return 0;
-  memcpy(payload, &version_, sizeof(version_));
-  payload += sizeof(version_);
-  return GetSerializedSize();
+    if (payload + GetSerializedSize() > end)
+        return 0;
+    memcpy(payload, &version_, sizeof(version_));
+    payload += sizeof(version_);
+    return GetSerializedSize();
 }
 
 int GetVersionResponse::Deserialize(const uint8_t* payload,
                                     const uint8_t* end) {
-  if (payload + GetSerializedSize() != end)
-    return ERR_NOT_VALID;
-  memcpy(&version_, payload, sizeof(version_));
-  payload += sizeof(version_);
-  return NO_ERROR;
+    if (payload + GetSerializedSize() != end)
+        return ERR_NOT_VALID;
+    memcpy(&version_, payload, sizeof(version_));
+    payload += sizeof(version_);
+    return NO_ERROR;
 }
 
 uint32_t PermanentAttributesMessage::GetSerializedSize() const {
-  return attributes_size_;
+    return attributes_size_;
 }
 
 uint32_t PermanentAttributesMessage::Serialize(uint8_t* payload,
                                                const uint8_t* end) const {
-  if (static_cast<uint32_t>(end - payload) != attributes_size_)
-    return 0;
-  memcpy(payload, attributes_.get(), attributes_size_);
-  return attributes_size_;
+    if (static_cast<uint32_t>(end - payload) != attributes_size_)
+        return 0;
+    memcpy(payload, attributes_.get(), attributes_size_);
+    return attributes_size_;
 }
 
 int PermanentAttributesMessage::Deserialize(const uint8_t* payload,
                                             const uint8_t* end) {
-  if (end < payload)
-    return ERR_NOT_VALID;
-  attributes_size_ = end - payload;
-  attributes_.reset(new uint8_t[attributes_size_]);
-  if (!attributes_.get())
-    return ERR_NO_MEMORY;
-  memcpy(attributes_.get(), payload, attributes_size_);
-  return NO_ERROR;
+    if (end < payload)
+        return ERR_NOT_VALID;
+    attributes_size_ = end - payload;
+    attributes_.reset(new uint8_t[attributes_size_]);
+    if (!attributes_.get())
+        return ERR_NO_MEMORY;
+    memcpy(attributes_.get(), payload, attributes_size_);
+    return NO_ERROR;
 }
 
 uint32_t LockStateMessage::GetSerializedSize() const {
-  return sizeof(lock_state_);
+    return sizeof(lock_state_);
 }
 
 uint32_t LockStateMessage::Serialize(uint8_t* payload,
                                      const uint8_t* end) const {
-  if (payload + GetSerializedSize() > end)
-    return 0;
-  memcpy(payload, &lock_state_, sizeof(lock_state_));
-  payload += sizeof(lock_state_);
-  return GetSerializedSize();
+    if (payload + GetSerializedSize() > end)
+        return 0;
+    memcpy(payload, &lock_state_, sizeof(lock_state_));
+    payload += sizeof(lock_state_);
+    return GetSerializedSize();
 }
 
 int LockStateMessage::Deserialize(const uint8_t* payload, const uint8_t* end) {
-  if (payload + GetSerializedSize() != end)
-    return ERR_NOT_VALID;
-  memcpy(&lock_state_, payload, sizeof(lock_state_));
-  payload += sizeof(lock_state_);
-  return NO_ERROR;
+    if (payload + GetSerializedSize() != end)
+        return ERR_NOT_VALID;
+    memcpy(&lock_state_, payload, sizeof(lock_state_));
+    payload += sizeof(lock_state_);
+    return NO_ERROR;
 }
 
 };  // namespace avb
