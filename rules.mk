@@ -31,7 +31,7 @@ MODULE_DEPS += \
 	app/trusty \
 	lib/libc-trusty \
 	lib/libstdc++-trusty \
-	lib/storage \
+	trusty/user/base/lib/storage \
 
 # Build the test.
 MODULE_DEPS += app/avb/test
