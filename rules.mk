@@ -29,8 +29,8 @@ IPC := ipc
 
 MODULE_DEPS += \
 	app/trusty \
-	lib/libc-trusty \
-	lib/libstdc++-trusty \
+	trusty/user/base/lib/libc-trusty \
+	trusty/user/base/lib/libstdc++-trusty \
 	trusty/user/base/lib/storage \
 
 # Build the test.
