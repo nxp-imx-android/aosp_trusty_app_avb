@@ -33,7 +33,7 @@ MODULE_DEPS += \
 	trusty/user/base/lib/storage \
 
 # Build the test.
-MODULE_DEPS += app/avb/test
+MODULE_DEPS += trusty/user/app/avb/test
 
 MODULE_INCLUDES += \
 	$(LOCAL_DIR)
