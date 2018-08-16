@@ -28,7 +28,6 @@ MODULE_CPPFLAGS += -std=c++11
 IPC := ipc
 
 MODULE_DEPS += \
-	app/trusty \
 	trusty/user/base/lib/libc-trusty \
 	trusty/user/base/lib/libstdc++-trusty \
 	trusty/user/base/lib/storage \
