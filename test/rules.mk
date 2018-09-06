@@ -23,9 +23,8 @@ HOST_SRCS := \
 	$(LOCAL_DIR)/unittest.cpp \
 
 HOST_INCLUDE_DIRS := \
-	lib/include \
-	app/avb \
-	lib/lib/libstdc++-trusty/include \
+	trusty/user/app/avb \
+	trusty/user/base/lib/libstdc++-trusty/include \
 
 HOST_FLAGS := -Wpointer-arith -fno-permissive \
 	-Wno-deprecated-declarations -fno-exceptions \
