@@ -16,9 +16,6 @@
 
 #include <trusty_unittest.h>
 
-// TODO(b/34062056): create a generic Trusty log.h file, so this kind of
-// conflict doesn't happen.
-#undef TLOGI
 #include "secure_storage_fake.h"
 
 namespace avb {

@@ -24,21 +24,8 @@
 #include "avb_messages.h"
 #include "secure_storage_interface.h"
 
-#define LOG_TAG "avb"
-
-#define TLOGE(fmt, ...)                                            \
-    fprintf(stderr, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
-            ##__VA_ARGS__)
-#define TLOGI(fmt, ...)                                            \
-    fprintf(stdout, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
-            ##__VA_ARGS__)
-#define TLOGD(fmt, ...)                                                    \
-    while (0) {                                                            \
-        if (DEBUG) {                                                       \
-            fprintf(stdout, "%s:%s:%d: " fmt, LOG_TAG, __func__, __LINE__, \
-                    ##__VA_ARGS__);                                        \
-        }                                                                  \
-    }
+#define TLOG_TAG "avb"
+#include <trusty_log.h>
 
 extern const unsigned int kRollbackSlotMax;
 
