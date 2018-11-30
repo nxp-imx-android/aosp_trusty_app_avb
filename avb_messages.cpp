@@ -115,6 +115,30 @@ int PermanentAttributesMessage::Deserialize(const uint8_t* payload,
     return NO_ERROR;
 }
 
+uint32_t VbmetaPublicKeyMessage::GetSerializedSize() const {
+    return publickey_size_;
+}
+
+uint32_t VbmetaPublicKeyMessage::Serialize(uint8_t* payload,
+                                               const uint8_t* end) const {
+    if (static_cast<uint32_t>(end - payload) != publickey_size_)
+        return 0;
+    memcpy(payload, publickey_.get(), publickey_size_);
+    return publickey_size_;
+}
+
+int VbmetaPublicKeyMessage::Deserialize(const uint8_t* payload,
+                                            const uint8_t* end) {
+    if (end < payload)
+        return ERR_NOT_VALID;
+    publickey_size_ = end - payload;
+    publickey_.reset(new uint8_t[publickey_size_]);
+    if (!publickey_.get())
+        return ERR_NO_MEMORY;
+    memcpy(publickey_.get(), payload, publickey_size_);
+    return NO_ERROR;
+}
+
 uint32_t LockStateMessage::GetSerializedSize() const {
     return sizeof(lock_state_);
 }
