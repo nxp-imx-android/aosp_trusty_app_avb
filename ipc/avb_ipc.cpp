@@ -93,6 +93,7 @@ static int ProcessRequest(uint32_t cmd,
         switch (cmd) {
         case WRITE_ROLLBACK_INDEX:
         case WRITE_PERMANENT_ATTRIBUTES:
+        case WRITE_VBMETA_PUBLIC_KEY:
         case WRITE_LOCK_STATE:
             *out_size = 0;
             *error = AvbError::kInvalid;
@@ -126,6 +127,12 @@ static int ProcessRequest(uint32_t cmd,
         *error = AvbError::kNone;
         boot_state_locked = true;
         return NO_ERROR;
+    case READ_VBMETA_PUBLIC_KEY:
+        return ExecuteCommand(&AvbManager::ReadVbmetaPublicKey, in_buf,
+                              in_size, out_buf, out_size, error);
+    case WRITE_VBMETA_PUBLIC_KEY:
+        return ExecuteCommand(&AvbManager::WriteVbmetaPublicKey, in_buf,
+                              in_size, out_buf, out_size, error);
 
     default:
         return ERR_NOT_VALID;

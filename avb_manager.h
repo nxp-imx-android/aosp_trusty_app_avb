@@ -67,6 +67,11 @@ public:
     void WritePermanentAttributes(
             const WritePermanentAttributesRequest& request,
             WritePermanentAttributesResponse* response);
+    void ReadVbmetaPublicKey(const ReadVbmetaPublicKeyRequest& request,
+                                 ReadVbmetaPublicKeyResponse* response);
+    void WriteVbmetaPublicKey(
+            const WriteVbmetaPublicKeyRequest& request,
+            WriteVbmetaPublicKeyResponse* response);
     void ReadLockState(const ReadLockStateRequest& request,
                        ReadLockStateResponse* response);
     void WriteLockState(const WriteLockStateRequest& request,
