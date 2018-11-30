@@ -150,6 +150,31 @@ class WritePermanentAttributesResponse : public EmptyMessage {};
 class ReadPermanentAttributesRequest : public EmptyMessage {};
 class ReadPermanentAttributesResponse : public PermanentAttributesMessage {};
 
+class VbmetaPublicKeyMessage : public AvbMessage {
+public:
+    VbmetaPublicKeyMessage() {}
+
+    uint32_t GetSerializedSize() const override;
+    uint32_t Serialize(uint8_t* payload, const uint8_t* end) const override;
+    int Deserialize(const uint8_t* payload, const uint8_t* end) override;
+
+    uint32_t get_publickey_size() const { return publickey_size_; }
+    uint8_t* get_publickey_buf() const { return publickey_.get(); }
+    int set_publickey_buf(const uint8_t* buf, const uint32_t size) {
+        return Deserialize(buf, buf + size);
+    }
+
+private:
+    UniquePtr<uint8_t[]> publickey_;
+    uint32_t publickey_size_ = 0;
+};
+
+class WriteVbmetaPublicKeyRequest : public VbmetaPublicKeyMessage {};
+class WriteVbmetaPublicKeyResponse : public EmptyMessage {};
+
+class ReadVbmetaPublicKeyRequest : public EmptyMessage {};
+class ReadVbmetaPublicKeyResponse : public VbmetaPublicKeyMessage {};
+
 class LockStateMessage : public AvbMessage {
 public:
     LockStateMessage() {}
