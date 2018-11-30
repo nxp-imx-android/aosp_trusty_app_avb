@@ -29,6 +29,8 @@ static const uint32_t kAvbVersion = 1;
 static const char* kAvbRollbackFilename = "avb.rollback";
 static const unsigned int kPermanentAttributesLengthMax = 2048;
 static const char* kPermanentAttributesFilename = "avb.ppa";
+static const unsigned int kVbmetaPublicKeyLengthMax = 2048;
+static const char* kVbmetaPublicKeyFilename = "avb.vpk";
 static const char* kLockStateFile = "avb.lock_state";
 static const unsigned int kStorageIdLengthMax = 64;
 
@@ -238,6 +240,64 @@ void AvbManager::WritePermanentAttributes(
     rc = storage_->write(0, attributes, attributes_size);
 
     if (rc < 0 || static_cast<size_t>(rc) < attributes_size) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: accessing storage object [%d]\n", rc);
+        return;
+    }
+}
+
+void AvbManager::ReadVbmetaPublicKey(
+        const ReadVbmetaPublicKeyRequest& request,
+        ReadVbmetaPublicKeyResponse* response) {
+    int rc = storage_->open(kVbmetaPublicKeyFilename);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to open vbmeta public key file: %d\n", rc);
+        return;
+    }
+
+    // Read vbmeta public key
+    UniquePtr<uint8_t[]> publickey(new uint8_t[kVbmetaPublicKeyLengthMax]);
+    rc = storage_->read(0, publickey.get(), kVbmetaPublicKeyLengthMax);
+    if (rc <= 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: %s public key file [%d]\n",
+              rc == 0 ? "missing" : "accessing", rc);
+        return;
+    }
+    uint32_t publickey_size = static_cast<uint32_t>(rc);
+    response->set_publickey_buf(publickey.get(), publickey_size);
+}
+
+void AvbManager::WriteVbmetaPublicKey(
+        const WriteVbmetaPublicKeyRequest& request,
+        WriteVbmetaPublicKeyResponse* response) {
+    int rc = storage_->open(kVbmetaPublicKeyFilename);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to open vbmeta public key file: %d\n", rc);
+        return;
+    }
+    uint64_t size;
+    rc = storage_->get_file_size(&size);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to get size of vbmeta public key file: %d\n",
+              rc);
+        return;
+    }
+
+    if (size) {
+        response->set_error(AvbError::kInvalid);
+        TLOGE("Error: Vbmeta public key already set!\n");
+        return;
+    }
+    // New file, write serialized vbmeta public key to storage
+    uint32_t publickey_size = request.get_publickey_size();
+    uint8_t* publickey = request.get_publickey_buf();
+    rc = storage_->write(0, publickey, publickey_size);
+
+    if (rc < 0 || static_cast<size_t>(rc) < publickey_size) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: accessing storage object [%d]\n", rc);
         return;
