@@ -142,7 +142,7 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
     }
     UniquePtr<uint8_t[]> msg_buf(new uint8_t[msg_info.len]);
 
-    iovec_t request_iov = {msg_buf.get(), msg_info.len};
+    struct iovec request_iov = {msg_buf.get(), msg_info.len};
     ipc_msg_t request_msg = {
             1,             // number of iovecs
             &request_iov,  // iovecs pointer
@@ -180,7 +180,7 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
     // Send response message back to caller
     avb_message avb_response_header = {
             .cmd = avb_request_header->cmd | AVB_RESP_BIT, .result = error, {}};
-    iovec_t response_iov[2] = {
+    struct iovec response_iov[2] = {
             {&avb_response_header, sizeof(avb_response_header)},
             {out_buf.get(), out_size},
     };
