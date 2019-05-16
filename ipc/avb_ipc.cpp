@@ -292,8 +292,7 @@ int main(void) {
         event.handle = INVALID_IPC_HANDLE;
         event.event = 0;
         event.cookie = nullptr;
-        unsigned long timeout = -1;
-        rc = wait_any(&event, timeout);
+        rc = wait_any(&event, INFINITE_TIME);
 
         if (rc == NO_ERROR) {  // got an event
             if (event.handle == port) {
