@@ -137,7 +137,7 @@ static int ProcessRequest(uint32_t cmd,
 // there is any I/O problem.
 static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
     if (msg_info.len > kAvbServiceBufSize) {
-        TLOGE("Message too large on channel %x: %d", channel, msg_info.len);
+        TLOGE("Message too large on channel %x: %zu", channel, msg_info.len);
         return ERR_TOO_BIG;
     }
     UniquePtr<uint8_t[]> msg_buf(new uint8_t[msg_info.len]);
