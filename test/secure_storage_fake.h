@@ -35,6 +35,8 @@ public:
     int write(uint64_t off, const void* buf, size_t size) const override {
         return size;
     }
+    void close() override {
+    }
 };
 
 }  // namespace avb
