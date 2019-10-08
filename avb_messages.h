@@ -196,6 +196,12 @@ class ReadLockStateResponse : public LockStateMessage {};
 class WriteLockStateRequest : public LockStateMessage {};
 class WriteLockStateResponse : public EmptyMessage {};
 
+class ReadOemDeviceUnlockRequest : public EmptyMessage {};
+class ReadOemDeviceUnlockResponse : public LockStateMessage {};
+
+class WriteOemDeviceUnlockRequest : public LockStateMessage {};
+class WriteOemDeviceUnlockResponse : public EmptyMessage {};
+
 }  // namespace avb
 
 #endif  // AVB_MESSAGES_H_
