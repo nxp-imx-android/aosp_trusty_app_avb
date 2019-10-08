@@ -134,6 +134,14 @@ static int ProcessRequest(uint32_t cmd,
         return ExecuteCommand(&AvbManager::WriteVbmetaPublicKey, in_buf,
                               in_size, out_buf, out_size, error);
 
+    case WRITE_OEM_UNLOCK_DEVICE_PERMISSION:
+        return ExecuteCommand(&AvbManager::WriteOemDeviceUnlockStatus, in_buf,
+                              in_size, out_buf, out_size, error);
+
+    case READ_OEM_UNLOCK_DEVICE_PERMISSION:
+        return ExecuteCommand(&AvbManager::ReadOemDeviceUnlockStatus, in_buf,
+                              in_size, out_buf, out_size, error);
+
     default:
         return ERR_NOT_VALID;
     }
