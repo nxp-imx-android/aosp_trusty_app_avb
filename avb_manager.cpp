@@ -32,6 +32,7 @@ static const char* kPermanentAttributesFilename = "avb.ppa";
 static const unsigned int kVbmetaPublicKeyLengthMax = 2048;
 static const char* kVbmetaPublicKeyFilename = "avb.vpk";
 static const char* kLockStateFile = "avb.lock_state";
+static const char* kOemDeviceUnlockFile = "avb.oem_device_unlock_state";
 static const unsigned int kStorageIdLengthMax = 64;
 
 static const uint32_t kTypeMask = 0xF000;
@@ -394,6 +395,69 @@ int AvbManager::DeleteRollbackIndexFiles() {
         }
     }
     return rc;
+}
+
+/* Read oem unlock status, this flag determines whether the device can be
+ * unlocked. Below implementation is almost a copy of "ReadLockState".
+ */
+void AvbManager::ReadOemDeviceUnlockStatus(const ReadOemDeviceUnlockRequest& request,
+                               ReadOemDeviceUnlockResponse* response) {
+    int rc = storage_->open(kOemDeviceUnlockFile);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to open oem device unlock state file: %d\n", rc);
+        return;
+    }
+    uint64_t size;
+    rc = storage_->get_file_size(&size);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to get size of oem device unlock state file: %d\n", rc);
+        return;
+    }
+
+    uint8_t lock_state = 0;
+    if (size == 0) {
+        // No oem device unlock state found, assume initial state is 0 and write it
+        rc = storage_->write(0, &lock_state, sizeof(lock_state));
+    } else {
+        rc = storage_->read(0, &lock_state, sizeof(lock_state));
+    }
+    if (rc < 0 || static_cast<size_t>(rc) < sizeof(lock_state)) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: accessing storage object [%d]\n", rc);
+        return;
+    }
+    response->set_lock_state(lock_state);
+}
+
+/* Write oem unlock status, this flag determines whether the device can be
+ * unlocked.
+ */
+void AvbManager::WriteOemDeviceUnlockStatus(const WriteOemDeviceUnlockRequest& request,
+                                WriteOemDeviceUnlockResponse* response) {
+    // Only 0 and 1 are valid lock states
+    uint8_t request_lock_state = request.get_lock_state();
+    if (request_lock_state != 0 && request_lock_state != 1) {
+        response->set_error(AvbError::kInvalid);
+        TLOGE("Error: invalid oem device unlock state requested: %d\n", request_lock_state);
+        return;
+    }
+
+    int rc = storage_->open(kOemDeviceUnlockFile);
+    if (rc < 0) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: failed to open oem device unlock state file: %d\n", rc);
+        return;
+    }
+
+    // Write new lock state
+    rc = storage_->write(0, &request_lock_state, sizeof(request_lock_state));
+    if (rc < 0 || static_cast<size_t>(rc) < sizeof(request_lock_state)) {
+        response->set_error(AvbError::kInternal);
+        TLOGE("Error: accessing storage object [%d]\n", rc);
+        return;
+    }
 }
 
 };  // namespace avb

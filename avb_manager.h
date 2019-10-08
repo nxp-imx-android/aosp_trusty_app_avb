@@ -63,6 +63,10 @@ public:
                        ReadLockStateResponse* response);
     void WriteLockState(const WriteLockStateRequest& request,
                         WriteLockStateResponse* response);
+    void ReadOemDeviceUnlockStatus(const ReadOemDeviceUnlockRequest& request,
+                                   ReadOemDeviceUnlockResponse* response);
+    void WriteOemDeviceUnlockStatus(const WriteOemDeviceUnlockRequest& request,
+                                    WriteOemDeviceUnlockResponse* response);
 
 private:
     int DeleteRollbackIndexFiles();
