@@ -60,6 +60,7 @@ public:
     // Returns number of bytes written on succes, negative error code on
     // failure.
     virtual int write(uint64_t off, const void* buf, size_t size) const = 0;
+    virtual void close() = 0;
 };
 
 }  // namespace avb
