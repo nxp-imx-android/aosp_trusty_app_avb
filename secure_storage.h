@@ -32,10 +32,9 @@ public:
     int read(uint64_t off, void* buf, size_t size) const override;
     int get_file_size(uint64_t* size) const override;
     int write(uint64_t off, const void* buf, size_t size) const override;
+    void close() override;
 
 private:
-    void close();
-
     storage_session_t session_handle_ = 0;
     file_handle_t file_handle_ = 0;
     int error_ = -EINVAL;
