@@ -88,6 +88,7 @@ void AvbManager::ReadRollbackIndex(const RollbackIndexRequest& request,
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: failed to get size of file %s: %d\n", filename, rc);
+        storage_->close();
         return;
     }
 
@@ -104,6 +105,7 @@ void AvbManager::ReadRollbackIndex(const RollbackIndexRequest& request,
                             sizeof(rollback_counter));
     }
 
+    storage_->close();
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: reading storage object: %d\n", rc);
@@ -140,6 +142,7 @@ void AvbManager::WriteRollbackIndex(const RollbackIndexRequest& request,
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: failed to get size of file %s: %d\n", filename, rc);
+        storage_->close();
         return;
     }
 
@@ -164,6 +167,7 @@ void AvbManager::WriteRollbackIndex(const RollbackIndexRequest& request,
                   static_cast<long unsigned>(request_value),
                   static_cast<long unsigned>(rollback_counter));
             response->set_value(rollback_counter);
+            storage_->close();
             return;
         }
         rc = storage_->write(sizeof(request_value) * slot, &request_value,
@@ -182,6 +186,7 @@ void AvbManager::WriteRollbackIndex(const RollbackIndexRequest& request,
         return;
     }
 
+    storage_->close();
     response->set_value(request_value);
 }
 
@@ -207,8 +212,11 @@ void AvbManager::ReadPermanentAttributes(
         response->set_error(AvbError::kInternal);
         TLOGE("Error: %s attributes file [%d]\n",
               rc == 0 ? "missing" : "accessing", rc);
+        storage_->close();
         return;
     }
+
+    storage_->close();
     uint32_t attributes_size = static_cast<uint32_t>(rc);
     response->set_attributes_buf(attributes.get(), attributes_size);
 }
@@ -227,18 +235,21 @@ void AvbManager::WritePermanentAttributes(
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: failed to get size of attributes file: %d\n", rc);
+        storage_->close();
         return;
     }
 
     if (size) {
         response->set_error(AvbError::kInvalid);
         TLOGE("Error: Permanent attributes already set!\n");
+        storage_->close();
         return;
     }
     // New file, write serialized permanent product attributes to storage
     uint32_t attributes_size = request.get_attributes_size();
     uint8_t* attributes = request.get_attributes_buf();
     rc = storage_->write(0, attributes, attributes_size);
+    storage_->close();
 
     if (rc < 0 || static_cast<size_t>(rc) < attributes_size) {
         response->set_error(AvbError::kInternal);
@@ -264,8 +275,11 @@ void AvbManager::ReadVbmetaPublicKey(
         response->set_error(AvbError::kInternal);
         TLOGE("Error: %s public key file [%d]\n",
               rc == 0 ? "missing" : "accessing", rc);
+        storage_->close();
         return;
     }
+
+    storage_->close();
     uint32_t publickey_size = static_cast<uint32_t>(rc);
     response->set_publickey_buf(publickey.get(), publickey_size);
 }
@@ -285,18 +299,21 @@ void AvbManager::WriteVbmetaPublicKey(
         response->set_error(AvbError::kInternal);
         TLOGE("Error: failed to get size of vbmeta public key file: %d\n",
               rc);
+        storage_->close();
         return;
     }
 
     if (size) {
         response->set_error(AvbError::kInvalid);
         TLOGE("Error: Vbmeta public key already set!\n");
+        storage_->close();
         return;
     }
     // New file, write serialized vbmeta public key to storage
     uint32_t publickey_size = request.get_publickey_size();
     uint8_t* publickey = request.get_publickey_buf();
     rc = storage_->write(0, publickey, publickey_size);
+    storage_->close();
 
     if (rc < 0 || static_cast<size_t>(rc) < publickey_size) {
         response->set_error(AvbError::kInternal);
@@ -318,6 +335,7 @@ void AvbManager::ReadLockState(const ReadLockStateRequest& request,
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: failed to get size of lock state file: %d\n", rc);
+        storage_->close();
         return;
     }
 
@@ -328,6 +346,8 @@ void AvbManager::ReadLockState(const ReadLockStateRequest& request,
     } else {
         rc = storage_->read(0, &lock_state, sizeof(lock_state));
     }
+    storage_->close();
+
     if (rc < 0 || static_cast<size_t>(rc) < sizeof(lock_state)) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: accessing storage object [%d]\n", rc);
@@ -363,12 +383,15 @@ void AvbManager::WriteLockState(const WriteLockStateRequest& request,
         if (DeleteRollbackIndexFiles() < 0) {
             response->set_error(AvbError::kInternal);
             TLOGE("Error: clearing rollback index data\n");
+            storage_->close();
             return;
         }
     }
 
     // Write new lock state
     rc = storage_->write(0, &request_lock_state, sizeof(request_lock_state));
+    storage_->close();
+
     if (rc < 0 || static_cast<size_t>(rc) < sizeof(request_lock_state)) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: accessing storage object [%d]\n", rc);
@@ -412,6 +435,7 @@ void AvbManager::ReadOemDeviceUnlockStatus(const ReadOemDeviceUnlockRequest& req
     rc = storage_->get_file_size(&size);
     if (rc < 0) {
         response->set_error(AvbError::kInternal);
+        storage_->close();
         TLOGE("Error: failed to get size of oem device unlock state file: %d\n", rc);
         return;
     }
@@ -423,6 +447,7 @@ void AvbManager::ReadOemDeviceUnlockStatus(const ReadOemDeviceUnlockRequest& req
     } else {
         rc = storage_->read(0, &lock_state, sizeof(lock_state));
     }
+    storage_->close();
     if (rc < 0 || static_cast<size_t>(rc) < sizeof(lock_state)) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: accessing storage object [%d]\n", rc);
@@ -453,6 +478,7 @@ void AvbManager::WriteOemDeviceUnlockStatus(const WriteOemDeviceUnlockRequest& r
 
     // Write new lock state
     rc = storage_->write(0, &request_lock_state, sizeof(request_lock_state));
+    storage_->close();
     if (rc < 0 || static_cast<size_t>(rc) < sizeof(request_lock_state)) {
         response->set_error(AvbError::kInternal);
         TLOGE("Error: accessing storage object [%d]\n", rc);
