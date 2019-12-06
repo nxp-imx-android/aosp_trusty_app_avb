@@ -179,7 +179,10 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
 
     // Send response message back to caller
     avb_message avb_response_header = {
-            .cmd = avb_request_header->cmd | AVB_RESP_BIT, .result = error, {}};
+            .cmd = avb_request_header->cmd | AVB_RESP_BIT,
+            .result = error,
+            .payload = {},
+    };
     struct iovec response_iov[2] = {
             {&avb_response_header, sizeof(avb_response_header)},
             {out_buf.get(), out_size},
