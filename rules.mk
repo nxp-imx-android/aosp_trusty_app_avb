@@ -17,8 +17,9 @@ LOCAL_DIR := $(GET_LOCAL_DIR)
 
 MODULE := $(LOCAL_DIR)
 
+MANIFEST := $(LOCAL_DIR)/manifest.json
+
 MODULE_SRCS += \
-	$(LOCAL_DIR)/manifest.c \
 	$(LOCAL_DIR)/avb_messages.cpp \
 	$(LOCAL_DIR)/avb_manager.cpp \
 	$(LOCAL_DIR)/secure_storage.cpp \
