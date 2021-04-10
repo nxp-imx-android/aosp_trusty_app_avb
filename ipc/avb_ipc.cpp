@@ -278,7 +278,7 @@ int main(void) {
     avb::AvbManager avb_manager(new avb::SecureStorage);
     g_avb_manager = &avb_manager;
 
-    TLOGI("Initializing AVB App\n");
+    TLOGD("Initializing AVB App\n");
 
     int rc = port_create(kAvbServiceName, kAvbServiceNumBufs,
                          kAvbServiceBufSize, kAvbServiceFlags);
