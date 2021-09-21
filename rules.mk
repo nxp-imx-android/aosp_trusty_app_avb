@@ -34,7 +34,9 @@ MODULE_LIBRARY_DEPS += \
 	trusty/user/base/lib/storage \
 
 # Build the test.
+ifeq (true,$(call TOBOOL,$(TEST_BUILD)))
 MODULE_DEPS += trusty/user/app/avb/test
+endif
 
 MODULE_INCLUDES += \
 	$(LOCAL_DIR)
