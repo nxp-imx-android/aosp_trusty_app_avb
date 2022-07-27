@@ -169,12 +169,14 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
 
     if (rc < 0) {
         TLOGE("Failed to read msg for channel %x: %d\n", channel, rc);
+        put_msg(channel, msg_info.id);
         return rc;
     }
 
     if (((size_t)rc) < sizeof(avb_message)) {
         TLOGE("Invalid message of size %zu for channel %x\n", (size_t)rc,
               channel);
+        put_msg(channel, msg_info.id);
         return ERR_NOT_VALID;
     }
 
@@ -189,8 +191,11 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
                         &error);
     if (rc < 0) {
         TLOGE("Unable to handle request: %d", rc);
+        put_msg(channel, msg_info.id);
         return rc;
     }
+
+    put_msg(channel, msg_info.id);
 
     // Send response message back to caller
     avb_message avb_response_header = {
@@ -211,6 +216,7 @@ static int ProcessOneMessage(handle_t channel, const ipc_msg_info_t& msg_info) {
     rc = send_msg(channel, &response_msg);
     if (rc < 0) {
         TLOGE("Failed to send_msg on channel %x: %d\n", channel, rc);
+        put_msg(channel, msg_info.id);
         return rc;
     }
     return NO_ERROR;
@@ -234,13 +240,6 @@ static int ProcessMessages(handle_t channel) {
 
         rc = ProcessOneMessage(channel, msg_info);
         if (rc != NO_ERROR) {
-            put_msg(channel, msg_info.id);
-            return rc;
-        }
-
-        rc = put_msg(channel, msg_info.id);
-        if (rc != NO_ERROR) {
-            TLOGE("Failed to put_msg on channel %x: %d\n", rc, channel);
             return rc;
         }
     }
